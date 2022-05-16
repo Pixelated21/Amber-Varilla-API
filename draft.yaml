@@ -1,0 +1,176 @@
+models:
+
+  User:
+    email: email:string unique
+    email_verified_at: timestamp
+    password: string nullable
+    remember_token: string:100 nullable
+    status: integer default:1
+    uuid: uuid
+    relationships:
+      morphOne: UserDetail
+      hasMany: JobApplication
+    softDeletes
+
+  CompanyAdmin:
+    email: email:string unique
+    email_verified_at: timestamp
+    password: string nullable
+    remember_token: string:100 nullable
+    status: integer default:1
+    uuid: uuid
+    relationships:
+      morphOne: UserDetail
+      hasMany: Company,CompanyEmployee
+
+  UserDetail:
+    firstName: string nullable
+    lastName: string nullable
+    sex: string nullable
+    birthDate: date nullable
+    resource_type: string
+    relationships:
+      morphTo: userDetailAble
+    softDeletes
+
+  Department:
+    timestamps: false
+    departmentName: string
+    relationships:
+      hasMany: CompanyEmployee
+    softDeletes
+
+  CompanyRole:
+    timestamps: false
+    companyRoleName: string
+    relationships:
+      hasMany: CompanyEmployee
+    softDeletes
+
+  Position:
+    timestamps: false
+    positionName: string
+    relationships:
+      hasMany: CompanyEmployee
+    softDeletes
+
+  Leave:
+    timestamps: false
+    leaveName: string
+    total: integer
+    relationships:
+      hasMany: CompanyEmployeeLeave
+    softDeletes
+
+  Company:
+    company_admin_id: id foreign:company_admins.id
+    companyName: string
+    uuid: uuid
+    isVerified: timestamp nullable
+    relationships:
+      hasMany: CompanyNotice,CompanyEmployee,CompanyEmployeeAssignedRole,Job
+      hasOne: CompanyDetail
+
+  CompanyDetail:
+    timestamps: false
+    company_id: id foreign:companies.id
+    companyEmail: string
+    companyWebsite: string
+    companyAddress: longtext
+    companyCountry: string
+    companyContact: string
+    relationships:
+      morphOne: Media
+
+  CompanyEmployee:
+    company_id: id foreign:companies.id
+    dept_id: id foreign:departments.id
+    position_id: id foreign:positions.id
+    email: string unique
+    employeeNumber: string unique
+    password: string
+    relationships:
+      hasOne: CompanyEmployeeSalary,CompanyEmployeeData,CompanyEmployeeAssignedRole
+      hasMany: CompanyEmployeeLeave
+
+  CompanyEmployeeData:
+    timestamps: false
+    company_employee_id: id foreign:company_employees.id
+    firstName: string
+    lastName: string
+    relationships:
+      morphMany: Media
+
+  CompanyEmployeeLeave:
+    company_employee_id: id foreign:company_employees.id
+    leave_id: id foreign:leaves.id
+    startDate: datetime
+    endDate: datetime
+    totalDays: integer
+
+  CompanyEmployeeSalary:
+    timestamps: false
+    company_employee_id: id foreign:company_employees.id
+    salary: integer
+    negotiable: boolean default:false
+
+  CompanyNotice:
+    company_id: id foreign:company.id
+    title: string
+    description: longtext
+    relationships:
+      morphMany: Media
+
+  CompanyEmployeeAssignedRole:
+    company_employee_id: id foreign:company_employees.id
+    company_roles_id: id foreign:company_roles.id
+    timestamps: false
+
+
+  Category:
+    categoryName: string
+    timestamps: false
+    relationships:
+      hasMany: Job
+
+  Job:
+    category_id: id foreign:categories.id
+    company_id: id foreign:companies.id
+    isActive: boolean default:true
+    uuid: uuid
+    relationships:
+      hasOne: JobDetail
+      hasMany: JobApplication
+
+  JobDetail:
+    timestamps: false
+    job_id: id foreign:jobs.id
+    jobTitle: string
+    jobDescription: longtext
+    jobModality: string
+    jobType: string
+    jobSalary: float
+
+  JobApplication:
+    job_id: id foreign:jobs.id
+    applicant_id: id foreign:users.id
+    status: integer
+    relationships:
+      hasOne: JobApplicationData
+
+  JobApplicationData:
+    timestamps: false
+    job_application_id: id foreign:job_application.id
+    relationships:
+      morphMany: Media
+
+  Media:
+    resource: string
+    resource_type: string
+    relationships:
+      morphTo: mediumable
+    softDeletes
+
+seeders: User,CompanyAdmin,Job,CompanyRole,Position,Leave,Department,Category,Company
+
+
